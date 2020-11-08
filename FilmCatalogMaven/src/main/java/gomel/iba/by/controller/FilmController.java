@@ -58,25 +58,29 @@ public class FilmController {
             Movie mov = iterable.next();
             int id = mov.getId();
             List<MovieGenres> list = movieGenresRepository.findByIdMovies(id);
-            StringBuilder sb = new StringBuilder("");
-            for (MovieGenres movieGenres1 : list) {
-                Genre genre = genreRepository.findById(movieGenres1.getIdGenres()).get();
-                sb.append(genre.getName()).append(", ");
-            }
-            genresString = sb.toString();
-            genresString = genresString.substring(0, genresString.length() - 2);
-            sb = new StringBuilder("");
-            List<MovieStaff> list1 = movieStaffRepository.findByIdMovies(id);
-            for (MovieStaff movieStaff1 : list1) {
-                Staff staff1 = staffRepository.findById(movieStaff1.getIdStaff()).get();
-                if (staff1.getPosition().equals("director")) {
-                    director = staff1.getFullName();
-                } else {
-                    sb.append(staff1.getFullName()).append(", ");
+            if (!list.isEmpty()) {
+                StringBuilder sb = new StringBuilder("");
+                for (MovieGenres movieGenres1 : list) {
+                    Genre genre = genreRepository.findById(movieGenres1.getIdGenres()).get();
+                    sb.append(genre.getName()).append(", ");
                 }
+                genresString = sb.toString();
+                genresString = genresString.substring(0, genresString.length() - 2);
             }
-            staffString = sb.toString();
-            staffString = staffString.substring(0, staffString.length() - 2);
+            StringBuilder sb = new StringBuilder("");
+            List<MovieStaff> list1 = movieStaffRepository.findByIdMovies(id);
+            if (!list1.isEmpty()) {
+                for (MovieStaff movieStaff1 : list1) {
+                    Staff staff1 = staffRepository.findById(movieStaff1.getIdStaff()).get();
+                    if (staff1.getPosition().equals("director")) {
+                        director = staff1.getFullName();
+                    } else {
+                        sb.append(staff1.getFullName()).append(", ");
+                    }
+                }
+                staffString = sb.toString();
+                staffString = staffString.substring(0, staffString.length() - 2);
+            }
             viewMovieList.add(new ViewMovie(mov, genresString, staffString, director));
         }
         LOGGER.info("Logging...");
