@@ -1,6 +1,8 @@
 package gomel.iba.by;
 
 import javax.persistence.*;
+import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "movies")
@@ -15,6 +17,30 @@ public class Movie {
 
     @Column(name = "year")
     private int year;
+
+    @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
+    @JoinTable(name = "moviestaff", joinColumns = @JoinColumn(name = "Movies_id"),
+        inverseJoinColumns = @JoinColumn(name = "Staff_id"))
+    private List<Staff> staffList;
+
+    @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
+    private Set<Genre> genreSet;
+
+    public List<Staff> getStaffList() {
+        return staffList;
+    }
+
+    public void setStaffList(List<Staff> staffList) {
+        this.staffList = staffList;
+    }
+
+    public Set<Genre> getGenreSet() {
+        return genreSet;
+    }
+
+    public void setGenreSet(Set<Genre> genreSet) {
+        this.genreSet = genreSet;
+    }
 
     public void setId(int id) {
         this.id = id;

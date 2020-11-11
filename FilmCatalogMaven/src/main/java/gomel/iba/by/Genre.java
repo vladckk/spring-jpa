@@ -1,6 +1,7 @@
 package gomel.iba.by;
 
 import javax.persistence.*;
+import java.util.Set;
 
 @Entity
 @Table(name = "genres")
@@ -12,6 +13,17 @@ public class Genre {
 
     @Column(name = "name")
     private String name;
+
+    @ManyToMany(cascade = CascadeType.ALL, mappedBy = "genreSet")
+    private Set<Movie> movieSet;
+
+    public Set<Movie> getMovieSet() {
+        return movieSet;
+    }
+
+    public void setMovieSet(Set<Movie> movieSet) {
+        this.movieSet = movieSet;
+    }
 
     public int getId() {
         return id;

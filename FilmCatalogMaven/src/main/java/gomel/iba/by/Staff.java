@@ -1,6 +1,7 @@
 package gomel.iba.by;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Table(name = "staff")
@@ -14,6 +15,17 @@ public class Staff {
     private String fullName;
 
     private String position;
+
+    @ManyToMany(cascade = CascadeType.ALL, mappedBy = "staffList")
+    private List<Movie> movieList;
+
+    public List<Movie> getMovieList() {
+        return movieList;
+    }
+
+    public void setMovieList(List<Movie> movieList) {
+        this.movieList = movieList;
+    }
 
     public int getId() {
         return id;
