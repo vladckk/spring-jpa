@@ -41,6 +41,60 @@ INSERT INTO `genres` VALUES (1,'musical'),(2,'comedy'),(3,'drama'),(4,'animated'
 UNLOCK TABLES;
 
 --
+-- Table structure for table `movie_actor`
+--
+
+DROP TABLE IF EXISTS `movie_actor`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `movie_actor` (
+  `idMovie` int NOT NULL,
+  `idActor` int NOT NULL,
+  PRIMARY KEY (`idMovie`,`idActor`),
+  KEY `FKewei5xtws1sxcjq5xaxdsbxl1` (`idActor`),
+  CONSTRAINT `FKajtsjcm90a1mryw8yrf8d2844` FOREIGN KEY (`idMovie`) REFERENCES `movies` (`id`),
+  CONSTRAINT `FKewei5xtws1sxcjq5xaxdsbxl1` FOREIGN KEY (`idActor`) REFERENCES `staff` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `movie_actor`
+--
+
+LOCK TABLES `movie_actor` WRITE;
+/*!40000 ALTER TABLE `movie_actor` DISABLE KEYS */;
+INSERT INTO `movie_actor` VALUES (1,1),(2,1),(1,2),(1,3),(1,4),(2,5),(2,6),(3,7),(3,8),(3,9),(4,14),(4,15),(4,16),(4,17),(5,17),(5,18),(5,19),(33,118),(35,120);
+/*!40000 ALTER TABLE `movie_actor` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `movie_director`
+--
+
+DROP TABLE IF EXISTS `movie_director`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `movie_director` (
+  `idMovie` int NOT NULL,
+  `idDirector` int NOT NULL,
+  PRIMARY KEY (`idMovie`,`idDirector`),
+  KEY `FKt97tuk875bmhmkfuljtrk5ti2` (`idDirector`),
+  CONSTRAINT `FKm3b07h8prjfunjson3r57sx4a` FOREIGN KEY (`idMovie`) REFERENCES `movies` (`id`),
+  CONSTRAINT `FKt97tuk875bmhmkfuljtrk5ti2` FOREIGN KEY (`idDirector`) REFERENCES `staff` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `movie_director`
+--
+
+LOCK TABLES `movie_director` WRITE;
+/*!40000 ALTER TABLE `movie_director` DISABLE KEYS */;
+INSERT INTO `movie_director` VALUES (1,10),(2,11),(3,12),(4,13),(5,13),(33,117),(35,119);
+/*!40000 ALTER TABLE `movie_director` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `movies`
 --
 
@@ -53,7 +107,7 @@ CREATE TABLE `movies` (
   `year` year DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=33 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=36 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -62,7 +116,7 @@ CREATE TABLE `movies` (
 
 LOCK TABLES `movies` WRITE;
 /*!40000 ALTER TABLE `movies` DISABLE KEYS */;
-INSERT INTO `movies` VALUES (1,'The Green Mile',1999),(2,'Forrest Gump',1994),(3,'The Little Mermaid',1994),(4,'Moonlight Kingdom',2012),(5,'The Grand Budapest Hotel',2014);
+INSERT INTO `movies` VALUES (1,'The Green Mile',1999),(2,'Forrest Gump',1994),(3,'The Little Mermaid',1994),(4,'Moonlight Kingdom',2012),(5,'The Grand Budapest Hotel',2014),(33,'The Green Elephant1',1997),(35,'The Best Film',2007);
 /*!40000 ALTER TABLE `movies` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -87,38 +141,8 @@ CREATE TABLE `movies_genres` (
 
 LOCK TABLES `movies_genres` WRITE;
 /*!40000 ALTER TABLE `movies_genres` DISABLE KEYS */;
-INSERT INTO `movies_genres` VALUES (1,3),(1,5),(2,2),(2,3),(3,1),(3,4),(3,5),(4,2),(4,3),(5,2),(5,3);
+INSERT INTO `movies_genres` VALUES (1,3),(1,5),(2,2),(2,3),(3,1),(3,4),(3,5),(4,2),(4,3),(5,2),(5,3),(33,13),(35,1),(35,2);
 /*!40000 ALTER TABLE `movies_genres` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `moviestaff`
---
-
-DROP TABLE IF EXISTS `moviestaff`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `moviestaff` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `Movies_id` int NOT NULL,
-  `Staff_id` int NOT NULL,
-  PRIMARY KEY (`id`,`Movies_id`,`Staff_id`),
-  UNIQUE KEY `id_UNIQUE` (`id`),
-  KEY `fk_MovieStaff_Movies1_idx` (`Movies_id`),
-  KEY `fk_MovieStaff_Staff1_idx` (`Staff_id`),
-  CONSTRAINT `fk_MovieStaff_Movies1` FOREIGN KEY (`Movies_id`) REFERENCES `movies` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `fk_MovieStaff_Staff1` FOREIGN KEY (`Staff_id`) REFERENCES `staff` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=80 DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `moviestaff`
---
-
-LOCK TABLES `moviestaff` WRITE;
-/*!40000 ALTER TABLE `moviestaff` DISABLE KEYS */;
-INSERT INTO `moviestaff` VALUES (5,2,1),(6,2,5),(7,2,6),(8,3,7),(9,3,8),(10,3,9),(12,2,11),(13,3,12),(14,4,13),(15,4,14),(16,4,15),(17,4,16),(18,4,17),(71,5,13),(72,5,17),(73,5,18),(74,5,19),(75,1,10),(76,1,1),(77,1,2),(78,1,3),(79,1,4);
-/*!40000 ALTER TABLE `moviestaff` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -134,7 +158,7 @@ CREATE TABLE `staff` (
   `position` varchar(45) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=114 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=121 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -143,7 +167,7 @@ CREATE TABLE `staff` (
 
 LOCK TABLES `staff` WRITE;
 /*!40000 ALTER TABLE `staff` DISABLE KEYS */;
-INSERT INTO `staff` VALUES (1,'Tom Hanks','actor'),(2,'Michael Clarke Duncan','actor'),(3,'David Morse','actor'),(4,'Bonnie Hunt','actor'),(5,'Robin Wright','actor'),(6,'Mykelti Williamson','actor'),(7,'Jodi Benson','actor'),(8,'Pat Carroll','actor'),(9,'Rene Auberjonois','actor'),(10,'Frank Darabont','director'),(11,'Robert Zemeckis','director'),(12,'John Musker','director'),(13,'Wes Anderson','director'),(14,'Ralph Fiennes','actor'),(15,'Tony Revolori','actor'),(16,'Adrien Brody','actor'),(17,'Edward Norton','actor'),(18,'Jared Gilman','actor'),(19,'Kara Hayward','actor'),(20,'adfslkj','director'),(21,'Yuri Chulyukin','director'),(22,'Nadezhda Rumyantseva','actor'),(23,'Nikolai Rybnikov','actor'),(25,'Svetlana Baskova','director'),(26,'Sergey Pakhomov','actor'),(27,'Vladimir Epifantsev','actor'),(29,'Svetlana Baskova1','director'),(30,'Sergey Pakhomov1','actor'),(31,' Vladimir Epifantsev1 ','actor'),(110,'The Wachowkis','director'),(111,'Keanu Reeves','actor'),(112,'Laurence Fishburne','actor'),(113,'Carrie-Anne Moss','actor');
+INSERT INTO `staff` VALUES (1,'Tom Hanks','actor'),(2,'Michael Clarke Duncan','actor'),(3,'David Morse','actor'),(4,'Bonnie Hunt','actor'),(5,'Robin Wright','actor'),(6,'Mykelti Williamson','actor'),(7,'Jodi Benson','actor'),(8,'Pat Carroll','actor'),(9,'Rene Auberjonois','actor'),(10,'Frank Darabont','director'),(11,'Robert Zemeckis','director'),(12,'John Musker','director'),(13,'Wes Anderson','director'),(14,'Ralph Fiennes','actor'),(15,'Tony Revolori','actor'),(16,'Adrien Brody','actor'),(17,'Edward Norton','actor'),(18,'Jared Gilman','actor'),(19,'Kara Hayward','actor'),(20,'adfslkj','director'),(21,'Yuri Chulyukin','director'),(22,'Nadezhda Rumyantseva','actor'),(23,'Nikolai Rybnikov','actor'),(25,'Svetlana Baskova','director'),(26,'Sergey Pakhomov','actor'),(27,'Vladimir Epifantsev','actor'),(29,'Svetlana Baskova1','director'),(30,'Sergey Pakhomov1','actor'),(31,' Vladimir Epifantsev1 ','actor'),(110,'The Wachowkis','director'),(111,'Keanu Reeves','actor'),(112,'Laurence Fishburne','actor'),(113,'Carrie-Anne Moss','actor'),(114,'Someone','director'),(115,'Pahom','actor'),(116,'Ryan Gosling','actor'),(117,'Joe Mama','director'),(118,'Pahomm','actor'),(119,'Garik Martirosyan','director'),(120,'Garik Harlamov','actor');
 /*!40000 ALTER TABLE `staff` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -160,4 +184,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-11-11 16:55:47
+-- Dump completed on 2020-11-24 11:01:15

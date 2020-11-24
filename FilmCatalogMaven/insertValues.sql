@@ -13,6 +13,7 @@ insert into staff(fullname, position) values('Tom Hanks', 'actor'), ('Michael Cl
 insert into movies_genres values(1, 3), (1, 5), (2, 2), (2, 3), (3, 1), (3, 4), (3, 5), (4, 2), (4, 3),
 	(5, 2), (5, 3);
 
-insert into moviestaff(Movies_id, Staff_id) values(1, 1), (1, 2), (1, 3), (1, 4), (2, 1), (2, 5), (2, 6),
-	(3, 7), (3, 8), (3, 9), (1, 10), (2, 11), (3, 12), (4, 13), (4, 14), (4, 15), (4, 16), (4, 17), (5, 13),
-    (5, 17), (5, 18), (5, 19);
+insert into movie_actor values(1, 1), (1, 2), (1, 3), (1, 4), (2, 1), (2, 5), (2, 6), (3, 7), (3, 8), (3, 9), 
+	(4, 14), (4, 15), (4, 16), (4, 17), (5, 17), (5, 18), (5, 19);
+    
+insert into movie_director values(1, 10), (2, 11), (3, 12), (4, 13), (5, 13);

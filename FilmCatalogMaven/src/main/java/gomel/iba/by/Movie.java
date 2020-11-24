@@ -19,20 +19,33 @@ public class Movie {
     private int year;
 
     @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
-    @JoinTable(name = "moviestaff", joinColumns = @JoinColumn(name = "Movies_id"),
-        inverseJoinColumns = @JoinColumn(name = "Staff_id"))
-    private List<Staff> staffList;
+    @JoinTable(name = "movie_actor", joinColumns = @JoinColumn(name = "idMovie"),
+        inverseJoinColumns = @JoinColumn(name = "idActor"))
+    private List<Staff> actorList;
+
+    public List<Staff> getActorList() {
+        return actorList;
+    }
+
+    public void setActorList(List<Staff> actorList) {
+        this.actorList = actorList;
+    }
+
+    public Staff getDirector() {
+        return director;
+    }
+
+    public void setDirector(Staff director) {
+        this.director = director;
+    }
+
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.PERSIST})
+    @JoinTable(name = "movie_director", joinColumns = @JoinColumn(name = "idMovie"),
+        inverseJoinColumns = @JoinColumn(name = "idDirector"))
+    private Staff director;
 
     @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     private Set<Genre> genreSet;
-
-    public List<Staff> getStaffList() {
-        return staffList;
-    }
-
-    public void setStaffList(List<Staff> staffList) {
-        this.staffList = staffList;
-    }
 
     public Set<Genre> getGenreSet() {
         return genreSet;

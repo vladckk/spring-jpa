@@ -44,9 +44,9 @@ public class FilmController {
     public String getFilmPage(Model model) {
         List<Movie> movies = movieRepository.findAll();
         Iterator<Movie> iterable = movies.iterator();
-        String genresString = "";
-        String staffString = "";
-        String director = "";
+        String genresString = null;
+        String actorsString = null;
+        String director;
         List<ViewMovie> viewMovieList = new ArrayList<>();
         while (iterable.hasNext()) {
             Movie mov = iterable.next();
@@ -56,26 +56,24 @@ public class FilmController {
                 for (Genre genre : genreSet) {
                     sb.append(genre.getName()).append(", ");
                 }
-                genresString = sb.toString();
-                genresString = genresString.substring(0, genresString.length() - 2);
+                genresString = sb.substring(0, sb.length() - 2);
             }
-            StringBuilder sb = new StringBuilder("");
-            List<Staff> staffList = mov.getStaffList();
-            if (!staffList.isEmpty()) {
-                for (Staff staff : staffList) {
-                    if (staff.getPosition().equals("director")) {
-                        director = staff.getFullName();
-                    } else {
-                        sb.append(staff.getFullName()).append(", ");
-                    }
+            List<Staff> actors = mov.getActorList();
+            if (!actors.isEmpty()) {
+                StringBuilder sb = new StringBuilder("");
+                for (Staff actor: actors) {
+                    sb.append(actor.getFullName()).append(", ");
                 }
-                staffString = sb.toString();
-                staffString = staffString.substring(0, staffString.length() - 2);
+                actorsString = sb.substring(0, sb.length() - 2);
             }
-            viewMovieList.add(new ViewMovie(mov, genresString, staffString, director));
+            Staff dir = mov.getDirector();
+            if (dir != null) {
+                director = dir.getFullName();
+            } else {
+                director = "Not Found";
+            }
+            viewMovieList.add(new ViewMovie(mov, genresString, actorsString, director));
         }
-        LOGGER.info("Logging...");
-        LOGGER.info("{}", viewMovieList);
         model.addAttribute("viewMovieList", viewMovieList);
         return "home";
     }
@@ -102,8 +100,8 @@ public class FilmController {
         Optional<Movie> movieOptional = movieRepository.findFirstByTitleAndYear(title, year);
         if (movieOptional.isPresent()) {
             Movie movie = movieOptional.get();
-            Optional<Staff> staffOptional = staffRepository.findFirstByFullNameAndPosition(director, "director");
-            if (staffOptional.isPresent() && movie.getStaffList().contains(staffOptional.get())) {
+            Optional<Staff> staffOptional = staffRepository.findFirstByFullName(director);
+            if (staffOptional.isPresent() && movie.getDirector().equals(staffOptional.get())) {
                 LOGGER.info("Film already exists");
                 throw new AlreadyExistFilmException();
             }
@@ -117,24 +115,26 @@ public class FilmController {
         movieRepository.save(movie);
         Example<Movie> movieExample = Example.of(movie);
         Movie movie1 = movieRepository.findOne(movieExample).get();
-        movie1.setStaffList(new ArrayList<Staff>());
-        List<Staff> staffList = movie1.getStaffList();
+        movie1.setActorList(new ArrayList<>());
+        Staff dir;
+        List<Staff> actorList = movie1.getActorList();
         if (staffRepository.existsByFullNameAndPosition(director, "director")) {
-            staffList.add(staffRepository.findFirstByFullName(director).get());
+            dir = staffRepository.findFirstByFullNameAndPosition(director, "director").get();
         } else {
             Staff staffDirector = new Staff(director, "director");
             staffRepository.save(staffDirector);
-            staffList.add(staffDirector);
+            dir = staffDirector;
         }
+        movie1.setDirector(dir);
         String[] arrayActors = actors.split(",");
         for (String actor : arrayActors) {
             actor = actor.trim();
             if (staffRepository.existsByFullNameAndPosition(actor, "actor")) {
-                staffList.add(staffRepository.findFirstByFullName(actor).get());
+                actorList.add(staffRepository.findFirstByFullName(actor).get());
             } else {
                 Staff staffActor = new Staff(actor, "actor");
                 staffRepository.save(staffActor);
-                staffList.add(staffActor);
+                actorList.add(staffActor);
             }
         }
         String[] arrayGenres = genres.split(",");
@@ -172,7 +172,10 @@ public class FilmController {
      */
     @GetMapping("edit/{id}")
     public String editItem(@PathVariable Integer id, Model model) {
-        Movie movie = movieRepository.findById(id).get();
+        Movie movie = movieRepository.findById(id).orElse(null);
+        if (movie == null) {
+            throw new FilmNotFoundException();
+        }
         LOGGER.info("{}", movie);
         model.addAttribute("movie", movie);
         Set<Genre> genres = movie.getGenreSet();
@@ -182,23 +185,25 @@ public class FilmController {
                 sb.append(genre.getName());
                 sb.append(", ");
             }
-            sb.deleteCharAt(sb.length() - 2);
         }
-        model.addAttribute("genres", sb.toString());
+        model.addAttribute("genres", sb.substring(0, sb.length() - 2));
         sb = new StringBuilder();
-        List<Staff> staffList = movie.getStaffList();
-        if (!staffList.isEmpty()) {
-            for (Staff actor : staffList) {
-                if (actor.getPosition().equals("actor")) {
-                    sb.append(actor.getFullName());
-                    sb.append(", ");
-                }
+        List<Staff> actors = movie.getActorList();
+        if (!actors.isEmpty()) {
+            for (Staff actor : actors) {
+                sb.append(actor.getFullName());
+                sb.append(", ");
             }
-            sb.deleteCharAt(sb.length() - 2);
         }
-        model.addAttribute("actors", sb.toString());
-        LOGGER.info("{}", staffList);
-        String director = staffList.stream().filter(staff -> staff.getPosition().equals("director")).findFirst().get().getFullName();
+        model.addAttribute("actors", sb.substring(0, sb.length() - 2));
+        LOGGER.info("{}", actors);
+        Staff dir = movie.getDirector();
+        String director;
+        if (dir == null) {
+            director = "";
+        } else {
+            director = dir.getFullName();
+        }
         model.addAttribute("director", director);
         return "edit";
     }
@@ -215,27 +220,26 @@ public class FilmController {
         movie.setYear(year);
         String[] genreNames = genres.split(",");
         String[] actorNames = actors.split(",");
-        List<Staff> staffList = movie.getStaffList();
+        List<Staff> actorList = movie.getActorList();
         Set<Genre> genreSet = movie.getGenreSet();
         List<Genre> listGenres = Arrays.stream(genreNames).map(genreName -> genreRepository.findFirstByName(genreName.trim()).orElse(null))
                 .collect(Collectors.toList());
-        List<Staff> listStaff = Arrays.stream(actorNames).map(staffName -> staffRepository.findFirstByFullNameAndPosition(staffName.trim(), "actor").orElse(null))
+        List<Staff> listActors = Arrays.stream(actorNames).map(staffName -> staffRepository.findFirstByFullNameAndPosition(staffName.trim(), "actor").orElse(null))
                 .collect(Collectors.toList());
         List<String> listNewGenres = Arrays.stream(genreNames).filter(genreName -> !genreRepository.existsByName(genreName.trim()))
                 .collect(Collectors.toList());
-        List<String> listNewStaff = Arrays.stream(actorNames).filter(actorName -> !staffRepository.existsByFullNameAndPosition(actorName.trim(), "actor"))
+        List<String> listNewActors = Arrays.stream(actorNames).filter(actorName -> !staffRepository.existsByFullNameAndPosition(actorName.trim(), "actor"))
                 .collect(Collectors.toList());
 
         movieRepository.save(movie);
-        Staff staffDirector = staffList.stream().filter(staff -> staff.getPosition().equals("director")).findFirst().get();
-        staffList.clear();
+        actorList.clear();
         genreSet.clear();
         if (staffRepository.findFirstByFullNameAndPosition(director, "director").isEmpty()) {
             Staff staff = new Staff(director, "director");
             staffRepository.save(staff);
-            staffList.add(staff);
+            movie.setDirector(staff);
         } else {
-            staffList.add(staffRepository.findFirstByFullNameAndPosition(director, "director").get());
+            movie.setDirector(staffRepository.findFirstByFullNameAndPosition(director, "director").get());
         }
 
         listNewGenres.forEach(genreName -> {
@@ -243,19 +247,19 @@ public class FilmController {
             genreRepository.save(genre);
             genreSet.add(genre);
         });
-        listNewStaff.forEach(staffName -> {
+        listNewActors.forEach(staffName -> {
             Staff staff = new Staff(staffName, "actor");
             staffRepository.save(staff);
-            staffList.add(staff);
+            actorList.add(staff);
         });
         listGenres.forEach(genre -> {
             if (genre != null) {
                 genreSet.add(genre);
             }
         });
-        listStaff.forEach(staff -> {
+        listActors.forEach(staff -> {
             if (staff != null) {
-                staffList.add(staff);
+                actorList.add(staff);
             }
         });
         return "redirect:/";
