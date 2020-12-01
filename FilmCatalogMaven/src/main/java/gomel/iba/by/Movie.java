@@ -23,6 +23,14 @@ public class Movie {
         inverseJoinColumns = @JoinColumn(name = "idActor"))
     private List<Staff> actorList;
 
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.PERSIST})
+    @JoinTable(name = "movie_director", joinColumns = @JoinColumn(name = "idMovie"),
+        inverseJoinColumns = @JoinColumn(name = "idDirector"))
+    private Staff director;
+
+    @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
+    private Set<Genre> genreSet;
+
     public List<Staff> getActorList() {
         return actorList;
     }
@@ -38,14 +46,6 @@ public class Movie {
     public void setDirector(Staff director) {
         this.director = director;
     }
-
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.PERSIST})
-    @JoinTable(name = "movie_director", joinColumns = @JoinColumn(name = "idMovie"),
-        inverseJoinColumns = @JoinColumn(name = "idDirector"))
-    private Staff director;
-
-    @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
-    private Set<Genre> genreSet;
 
     public Set<Genre> getGenreSet() {
         return genreSet;

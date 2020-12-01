@@ -6,6 +6,7 @@ import gomel.iba.by.exceptions.FilmNotFoundException;
 import gomel.iba.by.exceptions.IncorrectFilmException;
 import gomel.iba.by.exceptions.ValidationException;
 import gomel.iba.by.interfaces.*;
+import gomel.iba.by.specifications.MovieSpecifications;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,37 +45,74 @@ public class FilmController {
     public String getFilmPage(Model model) {
         List<Movie> movies = movieRepository.findAll();
         Iterator<Movie> iterable = movies.iterator();
-        String genresString = null;
-        String actorsString = null;
         String director;
         List<ViewMovie> viewMovieList = new ArrayList<>();
         while (iterable.hasNext()) {
             Movie mov = iterable.next();
-            Set<Genre> genreSet = mov.getGenreSet();
-            if (!genreSet.isEmpty()) {
-                StringBuilder sb = new StringBuilder("");
-                for (Genre genre : genreSet) {
-                    sb.append(genre.getName()).append(", ");
-                }
-                genresString = sb.substring(0, sb.length() - 2);
-            }
-            List<Staff> actors = mov.getActorList();
-            if (!actors.isEmpty()) {
-                StringBuilder sb = new StringBuilder("");
-                for (Staff actor: actors) {
-                    sb.append(actor.getFullName()).append(", ");
-                }
-                actorsString = sb.substring(0, sb.length() - 2);
-            }
             Staff dir = mov.getDirector();
             if (dir != null) {
                 director = dir.getFullName();
             } else {
                 director = "Not Found";
             }
-            viewMovieList.add(new ViewMovie(mov, genresString, actorsString, director));
+            viewMovieList.add(new ViewMovie(mov, FilmController.stringConstructor(mov.getGenreSet()),
+                    FilmController.stringConstructor(mov.getActorList()), director));
         }
         model.addAttribute("viewMovieList", viewMovieList);
+        return "home";
+    }
+
+    /**
+     * Transform collections to comma separated string
+     * @param collection only Genre and Staff collections
+     */
+    public static String stringConstructor(Collection<?> collection) {
+        Iterator it = collection.iterator();
+        Class genericType = null;
+        String value = null;
+        if (it.hasNext()) {
+            genericType = it.next().getClass();
+        }
+        if (genericType != null) {
+            if (genericType.equals(Genre.class) && !collection.isEmpty()) {
+                StringBuilder sb = new StringBuilder();
+                for (Object object : collection) {
+                    Genre genre = (Genre) object;
+                    sb.append(genre.getName()).append(", ");
+                }
+                value = sb.substring(0, sb.length() - 2);
+            } else if (genericType.equals(Staff.class)) {
+                StringBuilder sb = new StringBuilder();
+                for (Object object : collection) {
+                    Staff staff = (Staff) object;
+                    sb.append(staff.getFullName()).append(", ");
+                }
+                value = sb.substring(0, sb.length() - 2);
+            }
+        }
+        if (value == null) {
+            throw new IllegalArgumentException("Method can't handle this type of collection; It's only works with Genre and Staff collections");
+        }
+        return value;
+    }
+
+    /**
+     * Filtering database with multiple fields
+     */
+    @GetMapping("/search")
+    public String searchMovie(Model model, @RequestParam(value = "titleSearch", required = false) String titleSearch, @RequestParam(required = false) String genresSearch,
+                              @RequestParam(required = false) Integer yearSearch, @RequestParam(required = false) String actorsSearch,
+                              @RequestParam(required = false) String directorSearch) {
+        List<Movie> movies = movieRepository.findAll(MovieSpecifications.likeTitle(titleSearch).
+                        and(MovieSpecifications.equalYear(yearSearch)).
+                and(MovieSpecifications.likeDirector(directorSearch)).
+                        and(MovieSpecifications.likeActor(actorsSearch)).
+                and(MovieSpecifications.likeGenre(genresSearch)));
+        List<ViewMovie> viewMovieList = new ArrayList<>();
+        movies.forEach(movie -> viewMovieList.add(new ViewMovie(movie, FilmController.stringConstructor(movie.getGenreSet()),
+                FilmController.stringConstructor(movie.getActorList()), movie.getDirector().getFullName())));
+        model.addAttribute("viewMovieList", viewMovieList);
+        LOGGER.info(movies.toString());
         return "home";
     }
 
@@ -82,7 +120,7 @@ public class FilmController {
      * loads page for adding new movie to storage
      */
     @GetMapping("/add")
-    public String addNewFilmPage(Model model) {
+    public String addNewFilmPage() {
         return "add";
     }
 
@@ -138,7 +176,7 @@ public class FilmController {
             }
         }
         String[] arrayGenres = genres.split(",");
-        movie1.setGenreSet(new HashSet<Genre>());
+        movie1.setGenreSet(new HashSet<>());
         Set<Genre> genreSet = movie1.getGenreSet();
         for (String genre : arrayGenres) {
             genre = genre.trim();
@@ -178,25 +216,8 @@ public class FilmController {
         }
         LOGGER.info("{}", movie);
         model.addAttribute("movie", movie);
-        Set<Genre> genres = movie.getGenreSet();
-        StringBuilder sb = new StringBuilder();
-        if (!genres.isEmpty()) {
-            for (Genre genre : genres) {
-                sb.append(genre.getName());
-                sb.append(", ");
-            }
-        }
-        model.addAttribute("genres", sb.substring(0, sb.length() - 2));
-        sb = new StringBuilder();
-        List<Staff> actors = movie.getActorList();
-        if (!actors.isEmpty()) {
-            for (Staff actor : actors) {
-                sb.append(actor.getFullName());
-                sb.append(", ");
-            }
-        }
-        model.addAttribute("actors", sb.substring(0, sb.length() - 2));
-        LOGGER.info("{}", actors);
+        model.addAttribute("genres", FilmController.stringConstructor(movie.getGenreSet()));
+        model.addAttribute("actors", FilmController.stringConstructor(movie.getActorList()));
         Staff dir = movie.getDirector();
         String director;
         if (dir == null) {

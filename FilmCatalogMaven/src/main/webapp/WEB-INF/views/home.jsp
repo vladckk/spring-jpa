@@ -44,6 +44,17 @@
                     <td><a href="/delete/${movieList.movie.id}">delete</a></td>
                 </tr>
             </c:forEach>
+                <tr>
+                    <form action="/search" method="Get">
+                    <td><input type="text" name="titleSearch" autocomplete="off"></td>
+                    <td><input type="text" name="genresSearch" autocomplete="off"></td>
+                    <td><input type="number" name="yearSearch" autocomplete="off"></td>
+                    <td><input type="text" name="actorsSearch" autocomplete="off"></td>
+                    <td><input type="text" name="directorSearch" autocomplete="off"></td>
+                    <td><input type="submit" value="search"></td>
+                    </form>
+                    <td><a href="/">clear</a></td>
+                </tr>
         </table>
         <a href="/add/">Add new film</a>
     </body>
